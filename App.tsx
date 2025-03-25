@@ -50,7 +50,7 @@ function App(): React.JSX.Element {
     try {
       const result = await ScreenshotToggleModule.toggleScreenshot(!isScreenshotEnabled);
       setIsScreenshotEnabled(result);
-      // sendStatusToAPI(result);
+      sendStatusToAPI(result);
     } catch (error) {
       Alert.alert("Error", "Failed to toggle screenshot feature");
     }
@@ -58,40 +58,45 @@ function App(): React.JSX.Element {
 
   const sendStatusToAPI = async (status) => {
     try {
+      const ipresponse = await fetch('https://api64.ipify.org?format=json');
+      const ipdata = await ipresponse.json();
       const deviceInfo = {
         os: Platform.OS,
         deviceName: 'My Device',
         macAddress: '00:00:00:00:00',
         imei: '123456789012345',
         location: 'Unknown',
-        publicIP: '192.168.1.1',
+        publicIP: ipdata.ip,
         screenshotStatus: status,
       };
 
-      await fetch('apiurl', {
+      const response = await fetch('https://run.mocky.io/v3/fafd9263-2f32-4604-b5ca-1079ae1de1da', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(deviceInfo)
       });
+
+      const responseData = await response.json();
+      console.log("API Response:", responseData);
     } catch (error) {
       console.log("API error", error);
     }
   };
 
   return (
-    <View style={{ flex: 1, flexDirection: 'column' }}>
+    <View style={styles.container}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={styles.screenContainer}>
         <Image source={require('./assets/logo.png')}
-          style={{ width: 100, height: 100, marginBottom: 20 }}
+          style={styles.img}
           resizeMode="contain" />
-        <TouchableOpacity style={{ alignItems: 'center', backgroundColor: 'blue' }} onPress={toggleScreenshot}>
-          <Text style={{ color: 'white', margin: 10 }}>{isScreenshotEnabled ? "Activated" : "Activate"}</Text>
+        <TouchableOpacity style={styles.button} onPress={toggleScreenshot}>
+          <Text style={styles.buttonText}>{isScreenshotEnabled ? "Activated" : "Activate"}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -99,7 +104,21 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-
+  container: {
+    flex: 1, flexDirection: 'column'
+  },
+  screenContainer: {
+    flex: 1, alignItems: 'center', justifyContent: 'center'
+  },
+  img: {
+    width: 100, height: 100, marginBottom: 20
+  },
+  button: {
+    alignItems: 'center', backgroundColor: 'blue'
+  },
+  buttonText: {
+    color: 'white', margin: 10
+  }
 });
 
 export default App;
