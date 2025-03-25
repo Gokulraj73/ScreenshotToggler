@@ -1,0 +1,2 @@
+# ScreenshotToggler
+Screenshot toggler task
